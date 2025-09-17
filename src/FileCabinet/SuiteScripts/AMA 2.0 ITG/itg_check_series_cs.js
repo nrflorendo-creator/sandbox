@@ -168,15 +168,6 @@ define(["N/query"], (query) => {
   };
 
   return {
-    // pageInit,
-    // fieldChanged,
-    // postSourcing,
-    // sublistChanged,
-    // lineInit,
-    // validateField,
-    // validateLine,
-    // validateInsert,
-    // validateDelete,
     saveRecord,
   };
 });
