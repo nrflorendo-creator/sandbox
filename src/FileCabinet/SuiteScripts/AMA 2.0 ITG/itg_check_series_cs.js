@@ -1,13 +1,8 @@
 /**
- * @NApiVersion 2.x
+ * @NApiVersion 2.1
  * @NScriptType ClientScript
- * @NModuleScope SameAccount
  */
-define(['N/search','N/log'],
-function(search,log){
-
-
-    
+define(["N/query"], (query) => {
   /**
    * Function to be executed after page is initialized.
    *
@@ -17,9 +12,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function pageInit(scriptContext) {
-    		
-    }
+  const pageInit = (scriptContext) => {};
 
   /**
    * Function to be executed when field is changed.
@@ -33,9 +26,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function fieldChanged(scriptContext) {
-
-    }
+  const fieldChanged = (scriptContext) => {};
 
   /**
    * Function to be executed when field is slaved.
@@ -47,9 +38,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function postSourcing(scriptContext) {
-
-    }
+  const postSourcing = (scriptContext) => {};
 
   /**
    * Function to be executed after sublist is inserted, removed, or edited.
@@ -60,9 +49,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function sublistChanged(scriptContext) {
-
-    }
+  const sublistChanged = (scriptContext) => {};
 
   /**
    * Function to be executed after line is selected.
@@ -73,9 +60,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function lineInit(scriptContext) {
-
-    }
+  const lineInit = (scriptContext) => {};
 
   /**
    * Validation function to be executed when field is changed.
@@ -91,9 +76,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function validateField(scriptContext) {
-
-    }
+  const validateField = (scriptContext) => {};
 
   /**
    * Validation function to be executed when sublist line is committed.
@@ -106,9 +89,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function validateLine(scriptContext) {
-
-    }
+  const validateLine = (scriptContext) => {};
 
   /**
    * Validation function to be executed when sublist line is inserted.
@@ -121,9 +102,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function validateInsert(scriptContext) {
-
-    }
+  const validateInsert = (scriptContext) => {};
 
   /**
    * Validation function to be executed when record is deleted.
@@ -136,9 +115,7 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function validateDelete(scriptContext) {
-
-    }
+  const validateDelete = (scriptContext) => {};
 
   /**
    * Validation function to be executed when record is saved.
@@ -149,107 +126,57 @@ function(search,log){
    *
    * @since 2015.2
    */
-    function saveRecord(scriptContext) {
-    	
-    	var rec = scriptContext.currentRecord;
-        var rectype = rec.type;
-        var return_save = true;
-        var recid = rec.id;
-        
-        try{
-        	var BankAccount 	= rec.getValue({fieldId:'custrecord_itg_csppm_accountlink'});
-            var PaymentMethod 	= rec.getValue({fieldId:'custrecord_itg_csppm_paymentmethod'});
-            var User 			= rec.getValue({fieldId:'custrecord_itg_csppm_user'});
+  const saveRecord = (scriptContext) => {
+    const currRec = scriptContext.currentRecord;
+    let blSave = true;
 
-//            log.debug('PaymentMethod',PaymentMethod);
-//            log.debug('User',User);
-            if(recid == ''){
-            	recid = 0;
+    const inType = currRec.getValue("rectype");
+    const inBank = currRec.getValue("custrecord_itg_csppm_accountlink");
+    const inMethod = currRec.getValue("custrecord_itg_csppm_paymentmethod");
+    const inUser = currRec.getValue("custrecord_itg_csppm_user");
 
-            	log.debug('id',recid);
-            
-            }
-            if(rectype == 'customrecord_itg_checkseriesperpaymethod'){
-            	var searchSeriesRecord = searchRecords(
-        		   "customrecord_itg_checkseriesperpaymethod",
-        		   [
-        		      ["custrecord_itg_csppm_accountlink","anyof",BankAccount], 
-        		      "AND", 
-        		      ["custrecord_itg_csppm_paymentmethod","anyof",PaymentMethod], 
-        		      "AND", 
-        		      ["custrecord_itg_csppm_user","anyof",User],
-        		      "AND",
-        		      ["internalid","noneof",recid],
-        		      "AND",
-        		      ["isinactive","is","F"]
-        		   ],
-        		   [
-        		      search.createColumn({
-        		         name: "custrecord_itg_csppm_accountlink",
-        		         sort: search.Sort.ASC,
-        		         label: "Bank Account"
-        		      }),
-        		      search.createColumn({name: "custrecord_itg_csppm_paymentmethod", label: "Payment Method"}),
-        		      search.createColumn({name: "custrecord_itg_csppm_nextcheckseries", label: "Check Series"}),
-        		      search.createColumn({name: "custrecord_itg_csppm_user", label: "User"})
-        		   ]
-        		);
-            	
-            	
-        		if(searchSeriesRecord){
-        			if(searchSeriesRecord.length > 0){
-        				log.debug('searchSeriesRecord',searchSeriesRecord);
+    if (inBank && inMethod && inUser) {
+      const objData = query
+        .runSuiteQL({
+          query: `SELECT
+                    series.id,
+                    SUBSTR(BUILTIN.DF(series.custrecord_itg_csppm_accountlink), 1, INSTR(BUILTIN.DF(series.custrecord_itg_csppm_accountlink), ' ') - 1 ) AS bank,
+                    BUILTIN.DF(series.custrecord_itg_csppm_paymentmethod) AS method,
+                    BUILTIN.DF(series.custrecord_itg_csppm_user) AS user
+                
+                FROM CUSTOMRECORD_ITG_CHECKSERIESPERPAYMETHOD series
+                
+                WHERE series.custrecord_itg_csppm_accountlink = ${inBank} AND series.custrecord_itg_csppm_paymentmethod = ${inMethod} AND series.custrecord_itg_csppm_user = ${inUser}`,
+        })
+        .asMappedResults()[0];
 
-            			alert('This data {Bank, Payment Method and User} has a duplicate record.');
-            			return_save = false;
-                	}
-        			
-        		}
-        		
-            }
-        	
-        }catch(e){
-        	log.debug(e.name,e.message);
+      console.log("objData", objData);
+
+      if (objData) {
+        const stMessage = `The combination of Bank: "${objData.bank}", Payment Method: "${objData.method}", and User: "${objData.user}" is already in use.\n\nWould you like to open the existing record?`;
+        if (confirm(stMessage)) {
+          window.open(
+            `https://5532554-sb1.app.netsuite.com/app/common/custom/custrecordentry.nl?rectype=${inType}&id=${objData.id}`,
+            "_blank"
+          );
         }
-
-        return return_save;
-        
+        blSave = false;
+      }
     }
-	function searchRecords(type, filters, columns, title, id){
-		try{
-			var mySearch = search.create({type:type,columns:columns,filters:filters,title:title,id:id});
-			var arrSearchResults = [],
-			init = true,
-			count = 1000,
-			min = 0,
-			max = 1000,
-			resultSet;
-			while (count == 1000 || init) {
-				var rs = mySearch.run();	  		
-				var resultRange = rs.getRange({start:min,end:max}); 			
-				arrSearchResults = arrSearchResults.concat(resultRange);
-				min = max;
-				max += 1000;
-				init = false;
-				count = resultRange.length;
-			}
-			return arrSearchResults;
-		}
-		catch (ex){
-			return null;
-		} 
-	}
-  return {
-//        pageInit: pageInit,
-//        fieldChanged: fieldChanged,
-//        postSourcing: postSourcing,
-//        sublistChanged: sublistChanged,
-//        lineInit: lineInit,
-//        validateField: validateField,
-//        validateLine: validateLine,
-//        validateInsert: validateInsert,
-//        validateDelete: validateDelete,
-        saveRecord: saveRecord
+
+    return blSave;
   };
-    
+
+  return {
+    // pageInit,
+    // fieldChanged,
+    // postSourcing,
+    // sublistChanged,
+    // lineInit,
+    // validateField,
+    // validateLine,
+    // validateInsert,
+    // validateDelete,
+    saveRecord,
+  };
 });
