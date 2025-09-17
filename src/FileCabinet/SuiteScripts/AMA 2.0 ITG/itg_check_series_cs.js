@@ -129,16 +129,18 @@ define(["N/query"], (query) => {
   const saveRecord = (scriptContext) => {
     const currRec = scriptContext.currentRecord;
     let blSave = true;
+    console.log("currRec.id", currRec.id);
 
-    const inType = currRec.getValue("rectype");
-    const inBank = currRec.getValue("custrecord_itg_csppm_accountlink");
-    const inMethod = currRec.getValue("custrecord_itg_csppm_paymentmethod");
-    const inUser = currRec.getValue("custrecord_itg_csppm_user");
+    if (!currRec.id) {
+      const inType = currRec.getValue("rectype");
+      const inBank = currRec.getValue("custrecord_itg_csppm_accountlink");
+      const inMethod = currRec.getValue("custrecord_itg_csppm_paymentmethod");
+      const inUser = currRec.getValue("custrecord_itg_csppm_user");
 
-    if (inBank && inMethod && inUser) {
-      const objData = query
-        .runSuiteQL({
-          query: `SELECT
+      if (inBank && inMethod && inUser) {
+        const objData = query
+          .runSuiteQL({
+            query: `SELECT
                     series.id,
                     SUBSTR(BUILTIN.DF(series.custrecord_itg_csppm_accountlink), 1, INSTR(BUILTIN.DF(series.custrecord_itg_csppm_accountlink), ' ') - 1 ) AS bank,
                     BUILTIN.DF(series.custrecord_itg_csppm_paymentmethod) AS method,
@@ -147,23 +149,24 @@ define(["N/query"], (query) => {
                 FROM CUSTOMRECORD_ITG_CHECKSERIESPERPAYMETHOD series
                 
                 WHERE series.custrecord_itg_csppm_accountlink = ${inBank} AND series.custrecord_itg_csppm_paymentmethod = ${inMethod} AND series.custrecord_itg_csppm_user = ${inUser}`,
-        })
-        .asMappedResults()[0];
+          })
+          .asMappedResults()[0];
 
-      console.log("objData", objData);
+        console.log("objData", objData);
 
-      if (objData) {
-        const stMessage = `The combination of Bank: "${objData.bank}", Payment Method: "${objData.method}", and User: "${objData.user}" is already in use.\n\nWould you like to open the existing record?`;
+        if (objData) {
+          const stMessage = `The combination of Bank: "${objData.bank}", Payment Method: "${objData.method}", and User: "${objData.user}" is already in use.\n\nWould you like to open the existing record?`;
 
-        if (confirm(stMessage)) {
-          const baseUrl = window.location.origin; // dynamically gets sandbox or prod
-          window.open(
-            `${baseUrl}/app/common/custom/custrecordentry.nl?rectype=${inType}&id=${objData.id}`,
-            "_blank"
-          );
+          if (confirm(stMessage)) {
+            const baseUrl = window.location.origin; // dynamically gets sandbox or prod
+            window.open(
+              `${baseUrl}/app/common/custom/custrecordentry.nl?rectype=${inType}&id=${objData.id}`,
+              "_blank"
+            );
+          }
+
+          blSave = false;
         }
-
-        blSave = false;
       }
     }
 
