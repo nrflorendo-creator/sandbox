@@ -158,7 +158,7 @@ define(["N/query"], (query) => {
           const stMessage = `The combination of Bank: "${objData.bank}", Payment Method: "${objData.method}", and User: "${objData.user}" is already in use.\n\nWould you like to open the existing record?`;
 
           if (confirm(stMessage)) {
-            const baseUrl = window.location.origin; // dynamically gets sandbox or prod
+            const baseUrl = window.location.origin;
             window.open(
               `${baseUrl}/app/common/custom/custrecordentry.nl?rectype=${inType}&id=${objData.id}`,
               "_blank"
