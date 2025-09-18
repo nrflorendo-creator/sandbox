@@ -51,6 +51,33 @@ define(['N/record','N/search','N/log','N/runtime','N/currentRecord'],
                                 currentRecord.setValue('tranid',nextcheckseries);
                             }
                         }
+                    } else if(b_account == 1){// GCash Bank Account
+                        console.log("else GCASH", b_account);
+                        var currentUser = runtime.getCurrentUser();
+                        var inUser = currentUser.id;
+                        
+                        var inBankAccount = currentRecord.getValue('account');
+                        var inPaymentMethod = currentRecord.getValue('custbody15');
+                        
+                        if (inUser == 225854 || inUser == 32839 || inUser == 269816 || inUser == 245274) {
+                            var objData = gCashSeries({inBankAccount:inBankAccount, inPaymentMethod:inPaymentMethod});
+                            
+                            var inSeries = objData.inSeries;
+                            console.log("Current Series:", inSeries);
+                            var inLength = inSeries.length;
+                            var nextSeries = (parseInt(inSeries, 10) + 1).toString().padStart(inLength, "0");
+
+                            console.log("Next Series:", nextSeries);
+                            currentRecord.setValue('tranid', nextSeries);
+
+                            record.submitFields({
+                                type: 'customrecord_itg_checkseriesperpaymethod',
+                                id: '472',
+                                values: {
+                                    'custrecord_itg_csppm_nextcheckseries': nextSeries
+                                }
+                            });
+                        }
                     }
                     
                 }
@@ -190,6 +217,34 @@ define(['N/record','N/search','N/log','N/runtime','N/currentRecord'],
                 return null;
             } 
         };
+
+        function gCashSeries(options){
+            var objData = {};
+            var customrecord_itg_checkseriesperpaymethodSearchObj = search.create({
+                type: "customrecord_itg_checkseriesperpaymethod",
+                filters:
+                [
+                    ["custrecord_itg_csppm_accountlink","anyof",options.inBankAccount],
+                    "AND",
+                    ["custrecord_itg_csppm_paymentmethod","anyof",options.inPaymentMethod]
+                ],
+                columns:
+                [
+                    search.createColumn({name: "custrecord_itg_csppm_nextcheckseries", label: "Check Series"})
+                ]
+            });
+            
+            customrecord_itg_checkseriesperpaymethodSearchObj.run().each(function(result){
+                var inSeries = result.getValue({name: "custrecord_itg_csppm_nextcheckseries"});
+
+                objData['inSeries'] = inSeries;
+
+                return true;
+            });
+
+            return objData;
+        }
+
         return {
             fieldChanged: fieldChanged,
             saveRecord: saveRecord
