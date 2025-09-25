@@ -67,6 +67,9 @@ define(["N/runtime", "N/url", "N/https", "N/ui/dialog"], (
       console.log("blSave", blSave);
 
       return blSave;
+    } else {
+      console.log("else");
+      return true;
     }
   };
 
