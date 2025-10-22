@@ -7,146 +7,125 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
   dialog,
   search
 ) => {
-  const updatePDC = (options) => {
+  const createPDC = (options) => {
     const arrData = [];
-    const installmentMap = {};
 
-    const inCreatedFrom = options.newRec.getValue({
+    const recInvoice = record.load({
+      type: options.newRec.type,
+      id: options.newRec.id,
+      isDynamic: false,
+    });
+
+    const inSalesOrderId = recInvoice.getValue({
       fieldId: "createdfrom",
     });
 
-    const inLine = options.newRec.getLineCount({
+    const inLine = recInvoice.getLineCount({
       sublistId: "installment",
     });
 
     for (let indx = 0; indx < inLine; indx++) {
-      const dtDueDate = options.newRec.getSublistValue({
+      const inInstallmentNumber = recInvoice.getSublistValue({
+        sublistId: "installment",
+        fieldId: "seqnum",
+        line: indx,
+      });
+      const dtDueDate = recInvoice.getSublistValue({
         sublistId: "installment",
         fieldId: "duedate",
         line: indx,
       });
-      const inAmount = options.newRec.getSublistValue({
+      const inAmount = recInvoice.getSublistValue({
         sublistId: "installment",
         fieldId: "amount",
         line: indx,
       });
+      const inAmountDue = recInvoice.getSublistValue({
+        sublistId: "installment",
+        fieldId: "amountdue",
+        line: indx,
+      });
 
       arrData.push({
+        installment_number: inInstallmentNumber,
         due_date: dtDueDate,
         amount: inAmount,
+        amount_due: inAmountDue,
       });
     }
+    log.debug("arrData", arrData);
 
-    const objData = query
-      .runSuiteQL({
-        query: `SELECT pdc.id, pdc.custrecord_installment_number AS installment_number
-                  , pdc.name AS check_number
-                  , pdc.custrecord_status AS status
-                  , pdc.custrecord_due_date AS due_date
-                  , pdc.custrecord_amount AS amount
-                  , pdc.custrecord_amount_due AS amount_due
-                  , pdc.custrecord_payment AS payment
-                  
-                  FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
-                  
-                  WHERE pdc.custrecord_related_record = ${inCreatedFrom}`,
-      })
-      .asMappedResults();
-
-    if (!arrData.length) {
-      const dtDueDate = options.newRec.getValue({ fieldId: "duedate" });
-      const inTotal = options.newRec.getValue({ fieldId: "total" });
-
-      objData.forEach((data) => {
-        const recPDC = record.load({
-          type: "customrecord_pdi_post_dated_checks",
-          id: data.id,
-          isDynamic: true,
-        });
-
-        recPDC.setValue({ fieldId: "custrecord_status", value: "Clearing" });
-
-        if (dtDueDate) {
-          recPDC.setValue({
-            fieldId: "custrecord_due_date",
-            value: dtDueDate,
-          });
-        }
-
-        if (inTotal) {
-          recPDC.setValue({
-            fieldId: "custrecord_amount",
-            value: inTotal,
-          });
-          recPDC.setValue({
-            fieldId: "custrecord_amount_due",
-            value: inTotal,
-          });
-        }
-
-        recPDC.save();
-      });
-
-      return;
-    }
-
-    arrData.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-
-    const installmentNumbersSorted = objData
-      .map((o) => Number(o.installment_number) || 0)
-      .sort((a, b) => a - b);
-
-    for (let i = 0; i < installmentNumbersSorted.length; i++) {
-      const inst = installmentNumbersSorted[i];
-      installmentMap[inst] = {
-        due_date: arrData[i]?.due_date ?? null,
-        amount: arrData[i]?.amount ?? null,
-        amount_due: arrData[i]?.amount ?? null,
-      };
-    }
-
-    const mergedData = objData.map((item) => {
-      const instNum = Number(item.installment_number) || 0;
-      return {
-        ...item,
-        due_date: installmentMap[instNum]?.due_date ?? item.due_date ?? null,
-        amount: installmentMap[instNum]?.amount ?? item.amount ?? null,
-        amount_due:
-          installmentMap[instNum]?.amount_due ?? item.amount_due ?? null,
-      };
-    });
-    log.debug("Merged Data", mergedData);
-
-    mergedData.forEach((data) => {
-      const recPDC = record.load({
+    if (arrData.length === 0) {
+      const recPDC = record.create({
         type: "customrecord_pdi_post_dated_checks",
-        id: data.id,
         isDynamic: true,
       });
 
-      recPDC.setValue({ fieldId: "custrecord_status", value: "Clearing" });
-      if (data.due_date) {
+      recPDC.setValue({ fieldId: "name", value: "Pending user entry" });
+      recPDC.setValue({
+        fieldId: "custrecord_main_record",
+        value: inSalesOrderId,
+      });
+      recPDC.setValue({
+        fieldId: "custrecord_related_record",
+        value: recInvoice.id,
+      });
+      recPDC.setValue({
+        fieldId: "custrecord_due_date",
+        value: recInvoice.getValue("duedate"),
+      });
+      recPDC.setValue({
+        fieldId: "custrecord_amount",
+        value: recInvoice.getValue("subtotal"),
+      });
+      recPDC.setValue({
+        fieldId: "custrecord_amount_due",
+        value: recInvoice.getValue("subtotal"),
+      });
+      recPDC.setValue({ fieldId: "custrecord_installment_number", value: 0 });
+      recPDC.setValue({ fieldId: "custrecord_status", value: "Received" });
+
+      const recId = recPDC.save();
+    } else {
+      arrData.forEach((data) => {
+        const recPDC = record.create({
+          type: "customrecord_pdi_post_dated_checks",
+          isDynamic: true,
+        });
+
+        recPDC.setValue({ fieldId: "name", value: "Pending user entry" });
+        recPDC.setValue({
+          fieldId: "custrecord_main_record",
+          value: inSalesOrderId,
+        });
+        recPDC.setValue({
+          fieldId: "custrecord_related_record",
+          value: recInvoice.id,
+        });
         recPDC.setValue({
           fieldId: "custrecord_due_date",
           value: data.due_date,
         });
-      }
-      if (data.amount) {
-        recPDC.setValue({ fieldId: "custrecord_amount", value: data.amount });
-      }
-
-      if (data.amount_due) {
+        recPDC.setValue({
+          fieldId: "custrecord_amount",
+          value: data.amount,
+        });
         recPDC.setValue({
           fieldId: "custrecord_amount_due",
           value: data.amount_due,
         });
-      }
+        recPDC.setValue({
+          fieldId: "custrecord_installment_number",
+          value: data.installment_number,
+        });
+        recPDC.setValue({ fieldId: "custrecord_status", value: "Received" });
 
-      recPDC.save();
-    });
+        const recId = recPDC.save();
+      });
+    }
   };
 
-  const approve = (options) => {
+  const updatePDC = (options) => {
     const inStatus = options.newRec.getValue("approvalstatus");
 
     if (inStatus == 2) {
@@ -160,8 +139,9 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
                 WHERE transaction.id = ${options.newRec.id}`,
         })
         .asMappedResults()[0];
+      log.debug("objData", objData);
 
-      if (objData) {
+      if (objData && objData.nextdoc) {
         const fldLookUp = search.lookupFields({
           type: record.Type.DEPOSIT_APPLICATION,
           id: objData.nextdoc,
@@ -180,9 +160,12 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
                   
                   FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
                   
-                  WHERE pdc.custrecord_related_record = ${inCreatedFrom} AND (custrecord_installment_number = 0 OR custrecord_installment_number = 1)`,
+                  WHERE pdc.custrecord_main_record = ${inCreatedFrom} AND pdc.custrecord_installment_number IN (0, 1)
+                  ORDER BY pdc.custrecord_installment_number DESC
+                  FETCH FIRST 1 ROWS ONLY`,
           })
           .asMappedResults()[0];
+        log.debug("objDataPDC", objDataPDC);
 
         if (objDataPDC) {
           const recPDC = record.load({
@@ -205,46 +188,23 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     }
   };
 
-  const deleteUpdate = (options) => {
-    let inAmount = 0;
-
-    const inCreatedFrom = options.newRec.getValue({
-      fieldId: "createdfrom",
-    });
-
-    const fldLookUp = search.lookupFields({
-      type: record.Type.SALES_ORDER,
-      id: inCreatedFrom,
-      columns: ["total"],
-    });
+  const deletePDC = (options) => {
+    const inInvoiceId = options.newRec.id;
 
     const objData = query
       .runSuiteQL({
-        query: `SELECT pdc.id FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc WHERE pdc.custrecord_related_record = ${inCreatedFrom}`,
+        query: `SELECT pdc.id FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc WHERE pdc.custrecord_related_record = ${inInvoiceId}`,
       })
       .asMappedResults();
+    log.debug("objData", objData);
 
-    inAmount = Number(fldLookUp.total) / objData.length;
-
-    for (let indx = 0; indx < objData.length; indx++) {
-      const recPDC = record.load({
-        type: "customrecord_pdi_post_dated_checks",
-        id: objData[indx].id,
-        isDynamic: true,
-      });
-
-      recPDC.setValue({ fieldId: "custrecord_status", value: "Received" });
-      recPDC.setValue({
-        fieldId: "custrecord_due_date",
-        value: "",
-      });
-      recPDC.setValue({ fieldId: "custrecord_amount", value: inAmount });
-      recPDC.setValue({
-        fieldId: "custrecord_amount_due",
-        value: inAmount,
-      });
-
-      recPDC.save();
+    if (objData.length > 0) {
+      for (let indx = 0; indx < objData.length; indx++) {
+        record.delete({
+          type: "customrecord_pdi_post_dated_checks",
+          id: objData[indx].id,
+        });
+      }
     }
   };
 
@@ -299,5 +259,5 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     return isTrue;
   };
 
-  return { updatePDC, approve, deleteUpdate, checking };
+  return { createPDC, updatePDC, deletePDC, checking };
 });

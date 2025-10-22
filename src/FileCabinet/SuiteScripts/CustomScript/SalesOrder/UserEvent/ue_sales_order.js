@@ -3,10 +3,9 @@
  * @NScriptType UserEventScript
  */
 define([
-  "../Library/lib_sales_order.js",
   "../../Library/lib_btn_remove.js",
   "../../Library/lib_pdc_information.js",
-], (lib, remove, pdcInformation) => {
+], (remove, pdcInformation) => {
   /**
    * Defines the function definition that is executed before record is loaded.
    * @param {Object} scriptContext
@@ -41,14 +40,7 @@ define([
    * @param {string} scriptContext.type - Trigger type; use values from the context.UserEventType enum
    * @since 2015.2
    */
-  const beforeSubmit = (scriptContext) => {
-    // const newRec = scriptContext.newRecord;
-    // if (scriptContext.type === scriptContext.UserEventType.DELETE) {
-    //   lib.deletePDC({
-    //     newRec: newRec,
-    //   });
-    // }
-  };
+  const beforeSubmit = (scriptContext) => {};
 
   /**
    * Defines the function definition that is executed after record is submitted.
@@ -58,14 +50,7 @@ define([
    * @param {string} scriptContext.type - Trigger type; use values from the context.UserEventType enum
    * @since 2015.2
    */
-  const afterSubmit = (scriptContext) => {
-    // const newRec = scriptContext.newRecord;
-    // if (scriptContext.type === scriptContext.UserEventType.CREATE) {
-    //   lib.createPDC({
-    //     newRec: newRec,
-    //   });
-    // }
-  };
+  const afterSubmit = (scriptContext) => {};
 
   return { beforeLoad, beforeSubmit, afterSubmit };
 });

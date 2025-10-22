@@ -39,7 +39,7 @@ define(["../Library/lib_invoice.js", "../../Library/lib_btn_remove.js"], (
     const newRec = scriptContext.newRecord;
 
     if (scriptContext.type === scriptContext.UserEventType.DELETE) {
-      lib.deleteUpdate({
+      lib.deletePDC({
         newRec: newRec,
       });
     }
@@ -57,13 +57,13 @@ define(["../Library/lib_invoice.js", "../../Library/lib_btn_remove.js"], (
     const newRec = scriptContext.newRecord;
 
     if (scriptContext.type === scriptContext.UserEventType.CREATE) {
-      lib.updatePDC({
+      lib.createPDC({
         newRec: newRec,
       });
     }
 
     if (scriptContext.type === scriptContext.UserEventType.EDIT) {
-      lib.approve({
+      lib.updatePDC({
         newRec: newRec,
       });
     }

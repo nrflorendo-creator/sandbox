@@ -20,7 +20,7 @@ define(["N/query", "N/ui/serverWidget", "N/url"], (
                   
                   FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
                   
-                  WHERE pdc.custrecord_related_record = ${inId}`,
+                  WHERE pdc.custrecord_main_record = ${inId}`,
       })
       .asMappedResults();
 
