@@ -182,6 +182,7 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
             fieldId: "custrecord_payment",
             value: Number(fldLookUp.amount) * -1,
           });
+          recPDC.setValue({ fieldId: "custrecord_status", value: "Clearing" });
           recPDC.save();
         }
       }

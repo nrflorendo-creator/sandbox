@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  */
 define(["N/record", "N/query"], (record, query) => {
-  const update = (options) => {
+  const updatPDC = (options) => {
     const eventType = options.type;
 
     const arrData = [];
@@ -62,7 +62,7 @@ define(["N/record", "N/query"], (record, query) => {
                   
                   FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
                   
-                  WHERE pdc.custrecord_related_record = ${inCreatedFrom} AND custrecord_installment_number IN (${inClause})`,
+                  WHERE pdc.custrecord_main_record = ${inCreatedFrom} AND custrecord_installment_number IN (${inClause})`,
       })
       .asMappedResults();
 
@@ -115,5 +115,5 @@ define(["N/record", "N/query"], (record, query) => {
     });
   };
 
-  return { update };
+  return { updatPDC };
 });

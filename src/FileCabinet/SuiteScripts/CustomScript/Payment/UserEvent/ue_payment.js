@@ -36,7 +36,7 @@ define(["../Library/lib_payment.js"], (lib) => {
     const newRec = scriptContext.newRecord;
     const type = scriptContext.type;
 
-    lib.update({
+    lib.updatPDC({
       newRec: newRec,
       type: type,
     });
