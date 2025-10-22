@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
  */
-define(["../../Library/lib_btn_remove.js"], (remove) => {
+define(["../Library/lib_payment.js"], (lib) => {
   /**
    * Defines the function definition that is executed before record is loaded.
    * @param {Object} scriptContext
@@ -12,14 +12,7 @@ define(["../../Library/lib_btn_remove.js"], (remove) => {
    * @param {ServletRequest} scriptContext.request - HTTP request information sent from the browser for a client action only.
    * @since 2015.2
    */
-  const beforeLoad = (scriptContext) => {
-    if (scriptContext.type === scriptContext.UserEventType.VIEW) {
-      remove.btnRemove({
-        newRec: scriptContext.newRecord,
-        form: scriptContext.form,
-      });
-    }
-  };
+  const beforeLoad = (scriptContext) => {};
 
   /**
    * Defines the function definition that is executed before record is submitted.
@@ -29,17 +22,7 @@ define(["../../Library/lib_btn_remove.js"], (remove) => {
    * @param {string} scriptContext.type - Trigger type; use values from the context.UserEventType enum
    * @since 2015.2
    */
-  const beforeSubmit = (scriptContext) => {
-    const newRec = scriptContext.newRecord;
-
-    const inSubsidiary = newRec.getValue({
-      fieldId: "subsidiary",
-    });
-    newRec.setValue({
-      fieldId: "custitem_pdi_subsidiary",
-      value: inSubsidiary[0],
-    });
-  };
+  const beforeSubmit = (scriptContext) => {};
 
   /**
    * Defines the function definition that is executed after record is submitted.
@@ -49,7 +32,15 @@ define(["../../Library/lib_btn_remove.js"], (remove) => {
    * @param {string} scriptContext.type - Trigger type; use values from the context.UserEventType enum
    * @since 2015.2
    */
-  const afterSubmit = (scriptContext) => {};
+  const afterSubmit = (scriptContext) => {
+    const newRec = scriptContext.newRecord;
+    const type = scriptContext.type;
+
+    lib.update({
+      newRec: newRec,
+      type: type,
+    });
+  };
 
   return { beforeLoad, beforeSubmit, afterSubmit };
 });

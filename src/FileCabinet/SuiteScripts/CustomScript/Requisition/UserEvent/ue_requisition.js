@@ -2,11 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
  */
-define([
-  "N/ui/serverWidget",
-  "../../Library/lib_btn_remove.js",
-  "../../Library/lib_user_role.js",
-], (serverWidget, btnRemove, libRole) => {
+define(["../../Library/lib_btn_remove.js"], (remove) => {
   /**
    * Defines the function definition that is executed before record is loaded.
    * @param {Object} scriptContext
@@ -20,14 +16,10 @@ define([
     const newRec = scriptContext.newRecord;
     const form = scriptContext.form;
 
-    const inStatus = newRec.getValue({
-      fieldId: "custbody_pdi_approval_status",
-    });
-
-    if (libRole.user()) {
-      btnRemove.btnEdit({
+    if (scriptContext.type === scriptContext.UserEventType.VIEW) {
+      remove.btnRemove({
+        newRec: newRec,
         form: form,
-        inStatus: inStatus,
       });
     }
   };
