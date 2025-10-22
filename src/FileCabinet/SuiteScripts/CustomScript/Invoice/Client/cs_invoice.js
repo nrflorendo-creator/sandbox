@@ -6,7 +6,7 @@ define(["../Library/lib_invoice.js"], (lib) => {
   const saveRecord = (scriptContext) => {
     const currRec = scriptContext.currentRecord;
 
-    const isTrue = lib.checking({
+    const isTrue = lib.checkLineAmount({
       currRec: currRec,
     });
 

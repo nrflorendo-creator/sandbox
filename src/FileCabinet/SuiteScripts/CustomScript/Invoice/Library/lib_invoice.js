@@ -208,7 +208,7 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     }
   };
 
-  const checking = (options) => {
+  const checkLineAmount = (options) => {
     let isTrue = true;
     let errors = [];
 
@@ -259,5 +259,5 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     return isTrue;
   };
 
-  return { createPDC, updatePDC, deletePDC, checking };
+  return { createPDC, updatePDC, deletePDC, checkLineAmount };
 });
