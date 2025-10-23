@@ -87,7 +87,7 @@ define(["N/record", "N/query"], (record, query) => {
         if (eventType === "create") {
           currentPayment += paymentFromInvoice;
           currentAmountDue -= paymentFromInvoice;
-          if (currentAmountDue <= 0) {
+          if (currentAmountDue == 0) {
             stStatus = "Cleared/Deposited";
           }
         }
