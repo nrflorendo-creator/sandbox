@@ -3,6 +3,8 @@
  */
 define(["N/query"], (query) => {
   const load = (options) => {
+    const fldPaymentAmount = options.currRec.getField("payment");
+    fldPaymentAmount.isDisabled = true;
     const inCreatedFrom = options.currRec.getValue("salesorder");
 
     const objData = query
