@@ -209,6 +209,55 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     }
   };
 
+  const initialMessage = (options) => {
+    const objSublist = options.currRec.getSublist({
+      sublistId: "item",
+    });
+    var objColumn = objSublist.getColumn({
+      fieldId: "currentpercent",
+    });
+    objColumn.isDisabled = true;
+
+    dialog.alert({
+      title: "Important Notice",
+      message:
+        'Make sure the "Is Down Payment" line field is checked if this Invoice is for a downpayment.<br><br>' +
+        "This allows the system to automatically update the line items with the correct percentage and amount..",
+    });
+  };
+
+  const updateCurrentPercentage = (options) => {
+    if (options.fldId === "custcol_pdi_is_down_payment") {
+      const inIsDownPayment = options.currRec.getCurrentSublistValue({
+        sublistId: "item",
+        fieldId: "custcol_pdi_is_down_payment",
+      });
+
+      if (inIsDownPayment) {
+        options.currRec.setCurrentSublistValue({
+          sublistId: "item",
+          fieldId: "currentpercent",
+          value: 20,
+        });
+      } else {
+        options.currRec.setCurrentSublistValue({
+          sublistId: "item",
+          fieldId: "currentpercent",
+          value: 0,
+        });
+        const inAmountOrdered = options.currRec.getCurrentSublistValue({
+          sublistId: "item",
+          fieldId: "amountordered",
+        });
+        options.currRec.setCurrentSublistValue({
+          sublistId: "item",
+          fieldId: "amount",
+          value: inAmountOrdered,
+        });
+      }
+    }
+  };
+
   const checkLineAmount = (options) => {
     let isTrue = true;
     let errors = [];
@@ -260,5 +309,12 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     return isTrue;
   };
 
-  return { createPDC, updatePDC, deletePDC, checkLineAmount };
+  return {
+    createPDC,
+    updatePDC,
+    deletePDC,
+    initialMessage,
+    updateCurrentPercentage,
+    checkLineAmount,
+  };
 });
