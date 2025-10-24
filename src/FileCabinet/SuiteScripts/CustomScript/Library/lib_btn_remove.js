@@ -10,19 +10,28 @@ define(["N/query"], (query) => {
       fieldId:
         recType == "inventoryitem" || recType == "noninventoryitem"
           ? "custitem_pdi_approval_status"
+          : recType == "customerdeposit"
+          ? "status"
           : "custbody_pdi_approval_status",
     });
 
-    if (inStatus != 2) {
-      options.form.removeButton({
-        id: "edit",
-      });
-    }
+    if (recType === "customerdeposit") {
+      const stStatus = options.newRec.getValue({ fieldId: "status" });
+      if (stStatus == "Fully Applied") {
+        options.form.removeButton({ id: "edit" });
+      }
+    } else {
+      if (inStatus != 2) {
+        options.form.removeButton({
+          id: "edit",
+        });
+      }
 
-    if (inStatus != 9) {
-      options.form.removeButton({
-        id: "closeremaining",
-      });
+      if (inStatus != 9) {
+        options.form.removeButton({
+          id: "closeremaining",
+        });
+      }
     }
 
     options.form.removeButton({
