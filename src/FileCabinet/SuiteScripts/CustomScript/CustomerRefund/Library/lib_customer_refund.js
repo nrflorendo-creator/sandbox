@@ -80,6 +80,23 @@ define(["N/query", "N/record"], (query, record) => {
         custbody_pdi_approval_status: 8,
       },
     });
+
+    const objDataPDC = query
+      .runSuiteQL({
+        query: `SELECT pdc.id FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc WHERE pdc.custrecord_main_record = ${objData.salesorder_id}`,
+      })
+      .asMappedResults();
+    log.debug("objDataPDC", objDataPDC);
+
+    objDataPDC.forEach((row) => {
+      record.submitFields({
+        type: "customrecord_pdi_post_dated_checks",
+        id: row.id,
+        values: {
+          isinactive: true,
+        },
+      });
+    });
   };
 
   return { autoPopulateFields, disabledFields, toProcessCancelSO };

@@ -1,7 +1,7 @@
 /**
  * @NApiVersion 2.1
  */
-define(["N/record", "N/search"], (record, search) => {
+define(["N/record", "N/search", "N/query"], (record, search, query) => {
   const submitFields = (options) => {
     const inCreatedFrom = options.newRec.getValue({
       fieldId: "createdfrom",
@@ -64,6 +64,23 @@ define(["N/record", "N/search"], (record, search) => {
             values: {
               custbody_pdi_approval_status: 6,
             },
+          });
+
+          const objDataPDC = query
+            .runSuiteQL({
+              query: `SELECT pdc.id FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc WHERE pdc.custrecord_main_record = ${fldSearch.createdfrom[0].value}`,
+            })
+            .asMappedResults();
+          log.debug("objDataPDC", objDataPDC);
+
+          objDataPDC.forEach((row) => {
+            record.submitFields({
+              type: "customrecord_pdi_post_dated_checks",
+              id: row.id,
+              values: {
+                isinactive: false,
+              },
+            });
           });
         }
       }
