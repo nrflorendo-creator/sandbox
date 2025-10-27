@@ -4,9 +4,9 @@
  */
 define([
   "N/ui/serverWidget",
-  "../../Library/lib_btn_remove",
   "../Library/lib_customer_deposit.js",
-], (serverWidget, remove, lib) => {
+  "../../Library/lib_btn_remove",
+], (serverWidget, lib, remove) => {
   const beforeLoad = (scriptContext) => {
     if (scriptContext.type === scriptContext.UserEventType.VIEW) {
       remove.btnRemove({
