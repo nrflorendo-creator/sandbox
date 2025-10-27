@@ -4,12 +4,26 @@
  */
 define(["../Library/lib_customer_deposit.js"], (lib) => {
   const pageInit = (scriptContext) => {
-    const currRec = scriptContext.currentRecord;
-
-    lib.load({
-      currRec: currRec,
+    lib.pageLoad({
+      currRec: scriptContext.currentRecord,
+      mode: scriptContext.mode,
     });
   };
 
-  return { pageInit };
+  const fieldChanged = (scriptContext) => {
+    lib.fldChanged({
+      currRec: scriptContext.currentRecord,
+      fieldId: scriptContext.fieldId,
+    });
+  };
+
+  const saveRecord = (scriptContext) => {
+    const isTrue = lib.checkingCheckNumber({
+      currRec: scriptContext.currentRecord,
+    });
+
+    return isTrue;
+  };
+
+  return { pageInit, fieldChanged, saveRecord };
 });
