@@ -7,20 +7,19 @@ define(["N/query", "N/ui/serverWidget", "N/url"], (
   url
 ) => {
   const viewList = (options) => {
-    const inId = options.newRec.id;
     const objData = query
       .runSuiteQL({
         query: `SELECT pdc.id, pdc.custrecord_installment_number AS installment_number
-                  , pdc.name AS check_number
-                  , pdc.custrecord_status AS status
-                  , pdc.custrecord_due_date AS due_date
-                  , pdc.custrecord_amount AS amount
-                  , pdc.custrecord_amount_due AS amount_due
-                  , pdc.custrecord_payment AS payment
-                  
-                  FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
-                  
-                  WHERE pdc.custrecord_main_record = ${inId} AND pdc.isInactive = 'F'`,
+                , pdc.name AS check_number
+                , pdc.custrecord_status AS status
+                , pdc.custrecord_due_date AS due_date
+                , pdc.custrecord_amount AS amount
+                , pdc.custrecord_amount_due AS amount_due
+                , pdc.custrecord_payment AS payment
+                
+                FROM CUSTOMRECORD_PDI_POST_DATED_CHECKS pdc
+                
+                WHERE pdc.custrecord_main_record = ${options.newRec.id} AND pdc.isInactive = 'F'`,
       })
       .asMappedResults();
 
@@ -40,11 +39,19 @@ define(["N/query", "N/ui/serverWidget", "N/url"], (
     log.debug("objData -> lib_pdc_information", objData);
     if (objData && objData.length > 0) {
       let keys = Object.keys(objData[0]);
+
+      keys = keys.filter((key) => key !== "id");
+
       keys.forEach((key) => {
+        const titleLabel = key
+          .toLowerCase()
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+
         sublist.addField({
           id: "custpage_" + key,
           type: serverWidget.FieldType.TEXT,
-          label: `${key.replace(/_/g, " ").toUpperCase()}`,
+          label: titleLabel,
         });
       });
 

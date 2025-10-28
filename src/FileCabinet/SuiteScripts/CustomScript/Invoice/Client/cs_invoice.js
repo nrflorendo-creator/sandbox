@@ -4,28 +4,26 @@
  */
 define(["../Library/lib_invoice.js"], (lib) => {
   const pageInit = (scriptContext) => {
-    const currRec = scriptContext.currentRecord;
-
     lib.initialMessage({
-      currRec: currRec,
+      currRec: scriptContext.currentRecord,
     });
   };
 
   const fieldChanged = (scriptContext) => {
-    const currRec = scriptContext.currentRecord;
-    const fldId = scriptContext.fieldId;
-
     lib.updateCurrentPercentage({
-      currRec: currRec,
-      fldId: fldId,
+      currRec: scriptContext.currentRecord,
+      fldId: scriptContext.fieldId,
+    });
+
+    lib.fldChanged({
+      currRec: scriptContext.currentRecord,
+      fieldId: scriptContext.fieldId,
     });
   };
 
   const saveRecord = (scriptContext) => {
-    const currRec = scriptContext.currentRecord;
-
     const isTrue = lib.checkLineAmount({
-      currRec: currRec,
+      currRec: scriptContext.currentRecord,
     });
 
     return isTrue;

@@ -16,9 +16,7 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
       isDynamic: false,
     });
 
-    const inSalesOrderId = recInvoice.getValue({
-      fieldId: "createdfrom",
-    });
+    const inSalesOrderId = recInvoice.getValue("createdfrom");
 
     const inLine = recInvoice.getLineCount({
       sublistId: "installment",
@@ -148,9 +146,7 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
           columns: ["amount", "total"],
         });
 
-        const inCreatedFrom = options.newRec.getValue({
-          fieldId: "createdfrom",
-        });
+        const inCreatedFrom = options.newRec.getValue("createdfrom");
 
         const objDataPDC = query
           .runSuiteQL({
@@ -209,6 +205,22 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     }
   };
 
+  const addField = (options) => {
+    const fldTerms = options.form.addField({
+      id: "custpage_terms",
+      type: options.fldType.SELECT,
+      label: "Terms (c)",
+      container: "billingtablnk",
+    });
+    fldTerms.isMandatory = true;
+
+    options.form.insertField({
+      field: fldTerms,
+      isBefore: true,
+      nextfield: "terms",
+    });
+  };
+
   const initialMessage = (options) => {
     const objSublist = options.currRec.getSublist({
       sublistId: "item",
@@ -224,16 +236,35 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
         'Make sure the "Is Down Payment" line field is checked if this Invoice is for a downpayment.<br><br>' +
         "This allows the system to automatically update the line items with the correct percentage and amount..",
     });
+
+    const fldTerms = options.currRec.getField("custpage_terms");
+
+    const objSelectOption = query
+      .runSuiteQL({
+        query: `SELECT term.id, term.name
+        
+        FROM term
+        
+        WHERE UPPER(term.name) LIKE 'PDI%'`,
+      })
+      .asMappedResults();
+
+    objSelectOption.forEach((data) => {
+      fldTerms.insertSelectOption({
+        value: data.id,
+        text: data.name,
+      });
+    });
   };
 
   const updateCurrentPercentage = (options) => {
     if (options.fldId === "custcol_pdi_is_down_payment") {
-      const inIsDownPayment = options.currRec.getCurrentSublistValue({
+      const isDownPayment = options.currRec.getCurrentSublistValue({
         sublistId: "item",
         fieldId: "custcol_pdi_is_down_payment",
       });
 
-      if (inIsDownPayment) {
+      if (isDownPayment) {
         options.currRec.setCurrentSublistValue({
           sublistId: "item",
           fieldId: "currentpercent",
@@ -255,6 +286,17 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
           value: inAmountOrdered,
         });
       }
+    }
+  };
+
+  const fldChanged = (options) => {
+    if (options.fieldId === "custpage_terms") {
+      const inTerms = options.currRec.getValue("custpage_terms");
+
+      options.currRec.setValue({
+        fieldId: "terms",
+        value: inTerms,
+      });
     }
   };
 
@@ -313,7 +355,9 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
     createPDC,
     updatePDC,
     deletePDC,
+    addField,
     initialMessage,
+    fldChanged,
     updateCurrentPercentage,
     checkLineAmount,
   };
