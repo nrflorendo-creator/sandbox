@@ -100,7 +100,7 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
             "* has recently created and is now pending approval from the *" +
             scriptParam +
             "*.\n\n" +
-            "*Short Details:*\n" +
+            "*Transaction Details:*\n" +
             "Customer Name: " +
             stCustomerName +
             "\n" +
@@ -119,7 +119,7 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
             "* has been approved by the Accounting Director and is now pending approval from the *" +
             scriptParam +
             "*.\n\n" +
-            "*Short Details:*\n" +
+            "*Transaction Details:*\n" +
             "Customer Name: " +
             stCustomerName +
             "\n" +
