@@ -38,6 +38,9 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
         recId = scriptContext.request.parameters.recId;
         recType = scriptContext.request.parameters.recType;
         stDocumentNumber = scriptContext.request.parameters.stDocumentNumber;
+        stCustomerName = scriptContext.request.parameters.stCustomerName;
+        inAmount = scriptContext.request.parameters.inAmount;
+        dtDate = scriptContext.request.parameters.dtDate;
         scriptParam = scriptContext.request.parameters.scriptParam;
       } else if (scriptContext.request.method === "POST") {
         const body = scriptContext.request.body || "{}";
@@ -83,10 +86,52 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
       const fullUrl = `https://${domain}${recordUrl}`;
       log.debug("Full Record URL", fullUrl);
 
+      let formatedAmount = Number(inAmount || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
       if (scriptParam == "Approved") {
-        stMessage = `Sales Order #${stDocumentNumber} has been *approved*.\n\nYou can view the document using the link below:\n${fullUrl}`;
+        stMessage = `Sales Order #*${stDocumentNumber}* has been *approved*.\n\nYou can view the transaction using the link below:\n${fullUrl}`;
       } else {
-        stMessage = `Sales Order #${stDocumentNumber} is pending approval from the ${scriptParam}.\n\nPlease review the document using the link below:\n${fullUrl}`;
+        if (scriptParam == "Accounting Director") {
+          stMessage =
+            "Sales Order #*" +
+            stDocumentNumber +
+            "* has recently created and is now pending approval from the *" +
+            scriptParam +
+            "*.\n\n" +
+            "*Short Details:*\n" +
+            "Customer Name: " +
+            stCustomerName +
+            "\n" +
+            "Amount: " +
+            formatedAmount +
+            "\n" +
+            "Date: " +
+            dtDate +
+            "\n\n" +
+            "Please review the transaction using the link below:\n" +
+            fullUrl;
+        } else if (scriptParam == "Chief Financial Officer") {
+          stMessage =
+            "Sales Order #*" +
+            stDocumentNumber +
+            "* has been approved by the Accounting Director and is now pending approval from the *" +
+            scriptParam +
+            "*.\n\n" +
+            "*Short Details:*\n" +
+            "Customer Name: " +
+            stCustomerName +
+            "\n" +
+            "Amount: " +
+            formatedAmount +
+            "\n" +
+            "Date: " +
+            dtDate +
+            "\n\n" +
+            "Please review the transaction using the link below:\n" +
+            fullUrl;
+        }
       }
 
       const postMessageResponse = https.post({

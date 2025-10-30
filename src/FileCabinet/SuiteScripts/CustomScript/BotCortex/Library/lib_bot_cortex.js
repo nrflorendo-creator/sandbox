@@ -12,6 +12,9 @@ define(["N/runtime", "N/url", "N/https"], (runtime, url, https) => {
       const recType = options.scriptContext.newRecord.type;
       const stDocumentNumber =
         options.scriptContext.newRecord.getValue("tranid");
+      const stCustomerName = options.scriptContext.newRecord.getText("entity");
+      const inAmount = options.scriptContext.newRecord.getValue("total");
+      const dtDate = options.scriptContext.newRecord.getText("trandate");
 
       const urlWebhook = url.resolveScript({
         scriptId: "customscript_sl_bot_cortex",
@@ -28,6 +31,9 @@ define(["N/runtime", "N/url", "N/https"], (runtime, url, https) => {
           recId: recId,
           recType: recType,
           stDocumentNumber: stDocumentNumber,
+          stCustomerName: stCustomerName,
+          inAmount: inAmount,
+          dtDate: dtDate,
           scriptParam: scriptParam,
         },
       });
