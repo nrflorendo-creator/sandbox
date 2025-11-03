@@ -77,6 +77,9 @@ define(["N/query"], (query) => {
           form.removeButton({ id });
         }
       }
+      if (inStatus == 8) {
+        form.removeButton({ id: "billremaining" });
+      }
 
       const objData = query
         .runSuiteQL({
@@ -118,7 +121,7 @@ define(["N/query"], (query) => {
         ) {
           buttonIds = ["createdeposit"];
           if (result.strelatedrecord) {
-            buttonIds = ["process", "createdeposit"];
+            buttonIds = ["process", "createdeposit", "billremaining"];
           }
         }
 

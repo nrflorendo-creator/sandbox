@@ -6,7 +6,7 @@ define([
   "N/record",
   "../../Library/lib_btn_remove.js",
   "../../Library/lib_user_role.js",
-], (record, btnRemove, libRole) => {
+], (record, remove, libRole) => {
   /**
    * Defines the function definition that is executed before record is loaded.
    * @param {Object} scriptContext
@@ -20,16 +20,11 @@ define([
     const newRec = scriptContext.newRecord;
     const form = scriptContext.form;
 
-    const inStatus = newRec.getValue({
-      fieldId: "custbody_pdi_approval_status",
-    });
-    if (libRole.user()) {
-      if (scriptContext.type === scriptContext.UserEventType.VIEW) {
-        btnRemove.btnEdit({
-          form: form,
-          inStatus: inStatus,
-        });
-      }
+    if (scriptContext.type === scriptContext.UserEventType.VIEW) {
+      remove.btnRemove({
+        newRec: newRec,
+        form: form,
+      });
     }
 
     if (!libRole.user()) {

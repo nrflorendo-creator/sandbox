@@ -18,7 +18,7 @@ define(["N/runtime"], /**
     // }
 
     const administrator = 3;
-    const allowedRoles = [administrator, 1176];
+    const allowedRoles = [administrator, 1178];
 
     let isAllowed = allowedRoles.includes(currentUser.role);
 
