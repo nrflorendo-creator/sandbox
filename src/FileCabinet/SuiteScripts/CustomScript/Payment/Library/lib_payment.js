@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  */
 define(["N/record", "N/query"], (record, query) => {
-  const updatPDC = (options) => {
+  const updatePDC = (options) => {
     const eventType = options.type;
 
     const arrData = [];
@@ -115,5 +115,5 @@ define(["N/record", "N/query"], (record, query) => {
     });
   };
 
-  return { updatPDC };
+  return { updatePDC };
 });

@@ -4,7 +4,7 @@
  */
 define(["../Library/lib_payment.js"], (lib) => {
   const afterSubmit = (scriptContext) => {
-    lib.updatPDC({
+    lib.updatePDC({
       newRec: scriptContext.newRecord,
       type: scriptContext.type,
     });
