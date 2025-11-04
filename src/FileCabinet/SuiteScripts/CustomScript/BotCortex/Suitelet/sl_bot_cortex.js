@@ -92,6 +92,8 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
       });
       if (scriptParam == "Approved") {
         stMessage = `Sales Order #*${stDocumentNumber}* has been *approved*.\n\nYou can view the transaction using the link below:\n${fullUrl}`;
+      } else if (scriptParam == "Rejected") {
+        stMessage = `Sales Order #*${stDocumentNumber}* has been *rejected*.\n\nYou can view the transaction using the link below:\n${fullUrl}`;
       } else {
         if (scriptParam == "Accounting Director") {
           stMessage =
