@@ -145,7 +145,8 @@ for (var x = 1; x <= rec.getLineItemCount('item'); x++) {
 			// Match by item ID and quantity
 			nlapiLogExecution('DEBUG', 'description', "ItemDesc: "+ ItemDesc +" &&&&& "+ "poItemDesc: "+ poItemDesc);
 			nlapiLogExecution('DEBUG', 'condition', poItemId +"==="+ ItemId +"&&"+ poQty +"==="+ Qty);
-			if (poItemId === ItemId && poQty === Qty && poItemDesc === ItemDesc) {
+			// if (poItemId === ItemId && poQty === Qty && poItemDesc === ItemDesc) {
+			if (poItemId === ItemId && poItemDesc === ItemDesc) {
 				Rate = parseFloat(poRec.getLineItemValue('item', 'rate', y)) || 0;
 				break;
 			}
