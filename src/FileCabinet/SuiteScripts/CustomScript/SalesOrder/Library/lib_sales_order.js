@@ -1,8 +1,9 @@
 /**
  * @NApiVersion 2.1
  */
-define(["N/query", "N/ui/dialog", "N/runtime"], (query, dialog, runtime) => {
+define(["N/query", "N/ui/dialog"], (query, dialog) => {
   const itemIsInactive = (options) => {
+    let isTrue = true;
     let arrData = [];
     const inLine = options.currRec.getLineCount({ sublistId: "item" });
     for (let indx = 0; indx < inLine; indx++) {
@@ -60,10 +61,10 @@ define(["N/query", "N/ui/dialog", "N/runtime"], (query, dialog, runtime) => {
         message: msg,
       });
 
-      return false;
+      isTrue = false;
     }
 
-    return true;
+    return isTrue;
   };
 
   const customState = (options) => {
@@ -94,14 +95,5 @@ define(["N/query", "N/ui/dialog", "N/runtime"], (query, dialog, runtime) => {
     }
   };
 
-  const lockRecord = (options) => {
-    const currentUser = runtime.getCurrentUser();
-
-    const inStatus = options.newRec.getValue("custbody_pdi_approval_status");
-    if (inStatus == 2) return;
-    if (currentUser.role == 3) return;
-    throw "You are not allowed to edit this record.";
-  };
-
-  return { itemIsInactive, customState, lockRecord };
+  return { itemIsInactive, customState };
 });

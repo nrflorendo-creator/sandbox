@@ -6,10 +6,11 @@ define([
   "../Library/lib_sales_order.js",
   "../../Library/lib_btn_remove.js",
   "../../Library/lib_pdc_information.js",
-], (lib, remove, pdcInformation) => {
+  "../../Library/lib_disabled_edit.js",
+], (lib, remove, pdcInformation, disabledEdit) => {
   const beforeLoad = (scriptContext) => {
     if (scriptContext.type === scriptContext.UserEventType.EDIT) {
-      lib.lockRecord({
+      disabledEdit.lockRecord({
         newRec: scriptContext.newRecord,
       });
     }

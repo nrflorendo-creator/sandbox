@@ -4,9 +4,11 @@
  */
 define(["../Library/lib_sales_order.js"], (lib) => {
   const saveRecord = (scriptContext) => {
-    lib.itemIsInactive({
+    const isTrue = lib.itemIsInactive({
       currRec: scriptContext.currentRecord,
     });
+
+    return isTrue;
   };
 
   return { saveRecord };

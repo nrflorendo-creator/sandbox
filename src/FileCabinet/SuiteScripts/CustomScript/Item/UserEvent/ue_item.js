@@ -2,7 +2,10 @@
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
  */
-define(["../../Library/lib_btn_remove.js"], (remove) => {
+define([
+  "../../Library/lib_btn_remove.js",
+  "../../Library/lib_disabled_edit.js",
+], (remove, disabledEdit) => {
   /**
    * Defines the function definition that is executed before record is loaded.
    * @param {Object} scriptContext
@@ -13,6 +16,12 @@ define(["../../Library/lib_btn_remove.js"], (remove) => {
    * @since 2015.2
    */
   const beforeLoad = (scriptContext) => {
+    if (scriptContext.type === scriptContext.UserEventType.EDIT) {
+      disabledEdit.lockRecord({
+        newRec: scriptContext.newRecord,
+      });
+    }
+
     if (scriptContext.type === scriptContext.UserEventType.VIEW) {
       remove.btnRemove({
         newRec: scriptContext.newRecord,
