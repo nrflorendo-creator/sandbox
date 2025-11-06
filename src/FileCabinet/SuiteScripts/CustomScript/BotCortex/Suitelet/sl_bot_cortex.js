@@ -91,9 +91,41 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
         maximumFractionDigits: 2,
       });
       if (scriptParam == "Approved") {
-        stMessage = `Sales Order #*${stDocumentNumber}* has been *approved*.\n\nYou can view the transaction using the link below:\n${fullUrl}`;
+        stMessage =
+          "Sales Order #*" +
+          stDocumentNumber +
+          "* has been *approved*" +
+          "\n\n" +
+          "*Transaction Details:*\n" +
+          "Customer Name: " +
+          stCustomerName +
+          "\n" +
+          "Amount: " +
+          formatedAmount +
+          "\n" +
+          "Date: " +
+          dtDate +
+          "\n\n" +
+          "You can view the transaction using the link below:\n" +
+          fullUrl;
       } else if (scriptParam == "Rejected") {
-        stMessage = `Sales Order #*${stDocumentNumber}* has been *rejected*.\n\nYou can view the transaction using the link below:\n${fullUrl}`;
+        stMessage =
+          "Sales Order #*" +
+          stDocumentNumber +
+          "* has been *rejected*" +
+          "\n\n" +
+          "*Transaction Details:*\n" +
+          "Customer Name: " +
+          stCustomerName +
+          "\n" +
+          "Amount: " +
+          formatedAmount +
+          "\n" +
+          "Date: " +
+          dtDate +
+          "\n\n" +
+          "You can view the transaction using the link below:\n" +
+          fullUrl;
       } else {
         if (scriptParam == "Accounting Director") {
           stMessage =
