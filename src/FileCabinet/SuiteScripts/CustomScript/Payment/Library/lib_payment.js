@@ -115,5 +115,74 @@ define(["N/record", "N/query"], (record, query) => {
     });
   };
 
-  return { updatePDC };
+  const pageLoad = (options) => {
+    const fldPaymentMethod = options.currRec.getField(
+      "custpage_payment_method"
+    );
+
+    const objSelectOption = query
+      .runSuiteQL({
+        query: `SELECT paymentmethod.id, paymentmethod.name
+        
+        FROM paymentmethod
+        
+        WHERE UPPER(paymentmethod.name) LIKE 'PDI%'`,
+      })
+      .asMappedResults();
+
+    objSelectOption.forEach((data) => {
+      fldPaymentMethod.insertSelectOption({
+        value: data.id,
+        text: data.name,
+      });
+    });
+  };
+
+  const fldChanged = (options) => {
+    if (options.fieldId === "custpage_payment_method") {
+      const inPaymentMethod = options.currRec.getValue(
+        "custpage_payment_method"
+      );
+
+      options.currRec.setValue({
+        fieldId: "paymentmethod",
+        value: inPaymentMethod,
+      });
+    }
+  };
+
+  const checkingCheckNumber = (options) => {
+    let isTrue = true;
+    const isPaymentMethod = options.currRec.getValue("custpage_payment_method");
+
+    if (isPaymentMethod == 15) {
+      dialog.alert({
+        title: "Missing Required Field",
+        message: `Please fill in the Check Number field.<br><br> This field is required when Cheque is selected as the Payment Method.`,
+      });
+      isTrue = false;
+    }
+
+    return isTrue;
+  };
+
+  const addField = (options) => {
+    const fldPaymentMethod = options.form.addField({
+      id: "custpage_payment_method",
+      type: options.fldType.SELECT,
+      label: "Payment Method (c)",
+      container: "payment",
+    });
+    if (options.type !== "edit") {
+      fldPaymentMethod.isMandatory = true;
+    }
+
+    options.form.insertField({
+      field: fldPaymentMethod,
+      isBefore: true,
+      nextfield: "paymentmethod",
+    });
+  };
+
+  return { updatePDC, pageLoad, fldChanged, checkingCheckNumber, addField };
 });
