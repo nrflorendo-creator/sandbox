@@ -63,6 +63,7 @@ define(["N/record", "N/search", "N/query"], (record, search, query) => {
             id: fldSearch.createdfrom[0].value,
             values: {
               custbody_pdi_approval_status: 6,
+              custbody_pdi_next_approver: null,
             },
           });
 

@@ -97,6 +97,7 @@ define(["N/query", "N/record"], (query, record) => {
       id: objData.salesorder_id,
       values: {
         custbody_pdi_approval_status: 8,
+        custbody_pdi_next_approver: 3,
       },
     });
 
