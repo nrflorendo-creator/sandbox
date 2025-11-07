@@ -2,7 +2,7 @@
  * @NApiVersion 2.1
  * @NScriptType ClientScript
  */
-define(["N/record", "../Library/lib_customer_refund.js"], (record, lib) => {
+define(["../Library/lib_customer_refund.js"], (lib) => {
   const pageInit = (scriptContext) => {
     if (scriptContext.mode === "create") {
       lib.autoPopulateFields({
@@ -17,5 +17,20 @@ define(["N/record", "../Library/lib_customer_refund.js"], (record, lib) => {
     });
   };
 
-  return { pageInit, postSourcing };
+  const fieldChanged = (scriptContext) => {
+    lib.fldChanged({
+      currRec: scriptContext.currentRecord,
+      fieldId: scriptContext.fieldId,
+    });
+  };
+
+  const saveRecord = (scriptContext) => {
+    const isTrue = lib.checkingCheckNumber({
+      currRec: scriptContext.currentRecord,
+    });
+
+    return isTrue;
+  };
+
+  return { pageInit, postSourcing, fieldChanged, saveRecord };
 });

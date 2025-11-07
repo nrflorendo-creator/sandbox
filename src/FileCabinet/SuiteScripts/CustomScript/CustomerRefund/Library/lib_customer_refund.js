@@ -29,6 +29,25 @@ define(["N/query", "N/record"], (query, record) => {
       fieldId: "location",
       value: inLocation,
     });
+
+    const fldRefundMethod = options.currRec.getField("custpage_refund_method");
+
+    const objSelectOption = query
+      .runSuiteQL({
+        query: `SELECT paymentmethod.id, paymentmethod.name
+        
+        FROM paymentmethod
+        
+        WHERE UPPER(paymentmethod.name) LIKE 'PDI%'`,
+      })
+      .asMappedResults();
+
+    objSelectOption.forEach((data) => {
+      fldRefundMethod.insertSelectOption({
+        value: data.id,
+        text: data.name,
+      });
+    });
   };
 
   const disabledFields = (options) => {
@@ -99,5 +118,58 @@ define(["N/query", "N/record"], (query, record) => {
     });
   };
 
-  return { autoPopulateFields, disabledFields, toProcessCancelSO };
+  const addField = (options) => {
+    const fldRefundMethod = options.form.addField({
+      id: "custpage_refund_method",
+      type: options.fldType.SELECT,
+      label: "Refund Method (c)",
+      container: "payment",
+    });
+    if (options.type !== "edit") {
+      fldRefundMethod.isMandatory = true;
+    }
+
+    options.form.insertField({
+      field: fldRefundMethod,
+      isBefore: true,
+      nextfield: "paymentmethod",
+    });
+  };
+
+  const fldChanged = (options) => {
+    if (options.fieldId === "custpage_refund_method") {
+      const inPaymentMethod = options.currRec.getValue(
+        "custpage_refund_method"
+      );
+
+      options.currRec.setValue({
+        fieldId: "paymentmethod",
+        value: inPaymentMethod,
+      });
+    }
+  };
+
+  const checkingCheckNumber = (options) => {
+    let isTrue = true;
+    const isPaymentMethod = options.currRec.getValue("custpage_refund_method");
+
+    if (isPaymentMethod == 15) {
+      dialog.alert({
+        title: "Missing Required Field",
+        message: `Please fill in the Check Number field.<br><br> This field is required when Cheque is selected as the Payment Method.`,
+      });
+      isTrue = false;
+    }
+
+    return isTrue;
+  };
+
+  return {
+    autoPopulateFields,
+    disabledFields,
+    toProcessCancelSO,
+    addField,
+    fldChanged,
+    checkingCheckNumber,
+  };
 });

@@ -212,7 +212,9 @@ define(["N/query", "N/record", "N/ui/dialog", "N/search"], (
       label: "Terms (c)",
       container: "billingtablnk",
     });
-    fldTerms.isMandatory = true;
+    if (options.type !== "edit") {
+      fldTerms.isMandatory = true;
+    }
 
     options.form.insertField({
       field: fldTerms,

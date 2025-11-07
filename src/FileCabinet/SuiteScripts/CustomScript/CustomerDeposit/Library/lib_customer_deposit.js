@@ -54,15 +54,6 @@ define(["N/query", "N/ui/dialog"], (query, dialog) => {
         text: data.name,
       });
     });
-
-    console.log("Mode:", options.mode);
-    if (options.mode === "edit") {
-      const inPaymentMethod = options.currRec.getValue("paymentmethod");
-      options.currRec.setValue({
-        fieldId: "custpage_payment_method",
-        value: inPaymentMethod,
-      });
-    }
   };
 
   const fldChanged = (options) => {
@@ -100,7 +91,9 @@ define(["N/query", "N/ui/dialog"], (query, dialog) => {
       label: "Payment Method (c)",
       container: "payment",
     });
-    fldPaymentMethod.isMandatory = true;
+    if (options.type !== "edit") {
+      fldPaymentMethod.isMandatory = true;
+    }
 
     options.form.insertField({
       field: fldPaymentMethod,

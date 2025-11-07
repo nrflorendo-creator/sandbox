@@ -6,8 +6,15 @@ define([
   "N/ui/serverWidget",
   "../Library/lib_invoice.js",
   "../../Library/lib_btn_remove.js",
-], (serverWidget, lib, remove) => {
+  "../../Library/lib_disabled_edit.js",
+], (serverWidget, lib, remove, disabledEdit) => {
   const beforeLoad = (scriptContext) => {
+    if (scriptContext.type === scriptContext.UserEventType.EDIT) {
+      disabledEdit.lockRecord({
+        newRec: scriptContext.newRecord,
+      });
+    }
+
     if (scriptContext.type === scriptContext.UserEventType.VIEW) {
       remove.btnRemove({
         newRec: scriptContext.newRecord,
@@ -18,6 +25,7 @@ define([
     lib.addField({
       form: scriptContext.form,
       fldType: serverWidget.FieldType,
+      type: scriptContext.type,
     });
   };
 

@@ -18,6 +18,7 @@ define([
     lib.addField({
       form: scriptContext.form,
       fldType: serverWidget.FieldType,
+      type: scriptContext.type,
     });
   };
 
