@@ -12,10 +12,10 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
     try {
       const currScript = runtime.getCurrentScript();
       const scriptParam = currScript.getParameter({
-        name: "custscript_auth_token",
+        name: "custscript_object_auth_token",
       });
-      if (scriptParam && String(scriptParam).trim())
-        return String(scriptParam).trim();
+
+      return scriptParam ? JSON.parse(scriptParam) : {};
     } catch (e) {
       log.error("Auth token read failed", e);
       return "YOUR_CHANNEL_AUTH_TOKEN";
@@ -26,32 +26,50 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
     try {
       log.debug("Method", scriptContext.request.method);
       let stMessage = null;
-      let urlWebhook = null;
       let bodyData = {};
-
-      const authToken = getAuthToken();
-      log.debug("Auth Token", authToken);
 
       if (scriptContext.request.method === "GET") {
         log.debug("GET param", scriptContext.request.parameters);
-        urlWebhook = scriptContext.request.parameters.urlWebhook;
+        stApproverHolder = scriptContext.request.parameters.stApproverHolder;
+        stStatusHolder = scriptContext.request.parameters.stStatusHolder;
         recId = scriptContext.request.parameters.recId;
         recType = scriptContext.request.parameters.recType;
         stDocumentNumber = scriptContext.request.parameters.stDocumentNumber;
-        stCustomerName = scriptContext.request.parameters.stCustomerName;
+        stName = scriptContext.request.parameters.stName;
         inAmount = scriptContext.request.parameters.inAmount;
         dtDate = scriptContext.request.parameters.dtDate;
-        scriptParam = scriptContext.request.parameters.scriptParam;
+        urlWebhook = scriptContext.request.parameters.urlWebhook;
       } else if (scriptContext.request.method === "POST") {
         const body = scriptContext.request.body || "{}";
         bodyData = JSON.parse(body);
-        log.debug("POST bodyData", bodyData);
       }
 
       if (bodyData.event === "webhook") {
         scriptContext.response.write("ok");
         return;
       }
+
+      if (stApproverHolder == null || stApproverHolder === "") {
+        stApproverHolder =
+          stStatusHolder == "Draft" || stStatusHolder == "Approved"
+            ? "User Notification"
+            : "";
+        stStatusHolder = stStatusHolder == "Draft" ? "Rejected" : "Approved";
+      }
+
+      let stLabelName = "";
+      if (recType == "vendorbill") {
+        stLabelName = "Supplier";
+      } else if (recType == "salesorder") {
+        stLabelName = "Customer";
+      }
+
+      const objAuthToken = getAuthToken();
+      log.debug("Auth Token Object", objAuthToken);
+      const keyApprover = stApproverHolder.toLowerCase().replace(/\s+/g, "_");
+      log.debug("Key Approver", keyApprover);
+      const authToken = objAuthToken[keyApprover];
+      log.debug("Auth Token", authToken);
 
       const getAccountInfoResponse = https.post({
         url: "https://chatapi.viber.com/pa/get_account_info",
@@ -60,10 +78,7 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
         }),
         headers: { "Content-Type": "application/json" },
       });
-      log.debug("get_account_info Response", getAccountInfoResponse.body);
-
-      const superAdminId = lib.getSuperAdmin(getAccountInfoResponse.body);
-      log.debug("SuperAdmin ID", superAdminId);
+      log.debug("Account Info Response", getAccountInfoResponse.body);
 
       const setWebhookResponse = https.post({
         url: "https://chatapi.viber.com/pa/set_webhook",
@@ -73,7 +88,7 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
         }),
         headers: { "Content-Type": "application/json" },
       });
-      log.debug("set_webhook Response", setWebhookResponse.body);
+      log.debug("Set Webhook Response", setWebhookResponse.body);
 
       const recordUrl = url.resolveRecord({
         recordType: recType,
@@ -84,90 +99,44 @@ define(["N/runtime", "N/https", "N/url", "../Library/lib_bot_cortex.js"], (
         hostType: url.HostType.APPLICATION,
       });
       const fullUrl = `https://${domain}${recordUrl}`;
-      log.debug("Full Record URL", fullUrl);
 
-      let formatedAmount = Number(inAmount || 0).toLocaleString("en-US", {
+      let formattedAmount = Number(inAmount || 0).toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-      if (scriptParam == "Approved") {
-        stMessage =
-          "Sales Order #*" +
-          stDocumentNumber +
-          "* has been *approved*" +
-          "\n\n" +
-          "*Transaction Details:*\n" +
-          "Customer Name: " +
-          stCustomerName +
-          "\n" +
-          "Amount: " +
-          formatedAmount +
-          "\n" +
-          "Date: " +
-          dtDate +
-          "\n\n" +
-          "You can view the transaction using the link below:\n" +
-          fullUrl;
-      } else if (scriptParam == "Rejected") {
-        stMessage =
-          "Sales Order #*" +
-          stDocumentNumber +
-          "* has been *rejected*" +
-          "\n\n" +
-          "*Transaction Details:*\n" +
-          "Customer Name: " +
-          stCustomerName +
-          "\n" +
-          "Amount: " +
-          formatedAmount +
-          "\n" +
-          "Date: " +
-          dtDate +
-          "\n\n" +
-          "You can view the transaction using the link below:\n" +
-          fullUrl;
-      } else {
-        if (scriptParam == "Accounting Director") {
-          stMessage =
-            "Sales Order #*" +
-            stDocumentNumber +
-            "* has recently created and is now pending approval from the *" +
-            scriptParam +
-            "*.\n\n" +
-            "*Transaction Details:*\n" +
-            "Customer Name: " +
-            stCustomerName +
-            "\n" +
-            "Amount: " +
-            formatedAmount +
-            "\n" +
-            "Date: " +
-            dtDate +
-            "\n\n" +
-            "Please review the transaction using the link below:\n" +
-            fullUrl;
-        } else if (scriptParam == "Chief Financial Officer") {
-          stMessage =
-            "Sales Order #*" +
-            stDocumentNumber +
-            "* has been approved by the Accounting Director and is now pending approval from the *" +
-            scriptParam +
-            "*.\n\n" +
-            "*Transaction Details:*\n" +
-            "Customer Name: " +
-            stCustomerName +
-            "\n" +
-            "Amount: " +
-            formatedAmount +
-            "\n" +
-            "Date: " +
-            dtDate +
-            "\n\n" +
-            "Please review the transaction using the link below:\n" +
-            fullUrl;
-        }
-      }
 
+      // === NOTE: Don't move the value inside of `` because when you move it, the message will also move. Thank you!! ===
+      const baseMessage = `
+A transaction needs your approval.
+
+Document #: ${stDocumentNumber}
+${stLabelName}: ${stName}
+Amount: ${formattedAmount}
+
+Please comment if this transaction is already approved for your reference.
+
+View details:
+${fullUrl}
+`;
+
+      const userMessage = `
+New update showing status: ${stStatusHolder} for Document #: ${stDocumentNumber}.
+
+View details:
+${fullUrl}
+`;
+
+      const messageConfig = {
+        accounting_director: baseMessage,
+        ama_chief_financial_officer: baseMessage,
+        user_notification: userMessage,
+        ama_ap_manager: baseMessage,
+        ama_audit: baseMessage,
+        ama_chief_audit_executive: baseMessage,
+      };
+      stMessage = messageConfig[keyApprover];
+
+      const superAdminId = lib.getSuperAdmin(getAccountInfoResponse.body);
       const postMessageResponse = https.post({
         url: "https://chatapi.viber.com/pa/post",
         body: JSON.stringify({

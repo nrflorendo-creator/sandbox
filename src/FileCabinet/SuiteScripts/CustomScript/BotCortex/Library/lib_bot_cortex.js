@@ -5,14 +5,17 @@ define(["N/runtime", "N/url", "N/https"], (runtime, url, https) => {
   const botMessages = (options) => {
     try {
       const currScript = runtime.getCurrentScript();
-      const scriptParam = currScript.getParameter({
+      const stApproverHolder = currScript.getParameter({
         name: "custscript_approver_holder",
+      });
+      const stStatusHolder = currScript.getParameter({
+        name: "custscript_status_holder",
       });
       const recId = options.scriptContext.newRecord.id;
       const recType = options.scriptContext.newRecord.type;
       const stDocumentNumber =
         options.scriptContext.newRecord.getValue("tranid");
-      const stCustomerName = options.scriptContext.newRecord.getText("entity");
+      const stName = options.scriptContext.newRecord.getText("entity");
       const inAmount = options.scriptContext.newRecord.getValue("total");
       const dtDate = options.scriptContext.newRecord.getText("trandate");
 
@@ -27,14 +30,15 @@ define(["N/runtime", "N/url", "N/https"], (runtime, url, https) => {
         deploymentId: "customdeploy_sl_bot_cortex",
         returnExternalUrl: true,
         params: {
-          urlWebhook: urlWebhook,
+          stApproverHolder: stApproverHolder,
+          stStatusHolder: stStatusHolder,
           recId: recId,
           recType: recType,
           stDocumentNumber: stDocumentNumber,
-          stCustomerName: stCustomerName,
+          stName: stName,
           inAmount: inAmount,
           dtDate: dtDate,
-          scriptParam: scriptParam,
+          urlWebhook: urlWebhook,
         },
       });
 
