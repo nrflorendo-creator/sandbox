@@ -133,6 +133,8 @@ ${fullUrl}
         ama_ap_manager: baseMessage,
         ama_audit: baseMessage,
         ama_chief_audit_executive: baseMessage,
+        sales_doc_admin: baseMessage,
+        accounting_officer: baseMessage,
       };
       stMessage = messageConfig[keyApprover];
 
