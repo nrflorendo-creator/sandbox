@@ -27,7 +27,7 @@ define(["N/query"], (query) => {
         });
       }
 
-      if (inStatus != 9) {
+      if (inStatus != 8) {
         options.form.removeButton({
           id: "closeremaining",
         });
@@ -77,7 +77,7 @@ define(["N/query"], (query) => {
           form.removeButton({ id });
         }
       }
-      if (inStatus == 8) {
+      if (inStatus == 13) {
         form.removeButton({ id: "billremaining" });
       }
 
@@ -105,30 +105,36 @@ define(["N/query"], (query) => {
         }
       }
 
-      for (const result of objData) {
-        let buttonIds = [];
+      let buttonIds = ["process", "createdeposit"];
 
-        if (
-          (result.sttype === "OrdDep" &&
-            result.ststatus === "Customer Deposit : Not Deposited") ||
-          (result.sttype === "OrdBill" &&
-            result.ststatus !== "Invoice : Paid In Full")
-        ) {
-          buttonIds = ["process", "createdeposit"];
-        } else if (
-          result.sttype === "OrdBill" &&
-          result.ststatus === "Invoice : Paid In Full"
-        ) {
-          buttonIds = ["createdeposit"];
-          if (result.strelatedrecord) {
-            buttonIds = ["process", "createdeposit", "billremaining"];
-          }
-        }
-
-        for (const id of buttonIds) {
-          form.removeButton({ id });
-        }
+      for (const id of buttonIds) {
+        form.removeButton({ id });
       }
+
+      // for (const result of objData) {
+      //   let buttonIds = [];
+
+      //   if (
+      //     (result.sttype === "OrdDep" &&
+      //       result.ststatus === "Customer Deposit : Not Deposited") ||
+      //     (result.sttype === "OrdBill" &&
+      //       result.ststatus !== "Invoice : Paid In Full")
+      //   ) {
+      //     buttonIds = ["process", "createdeposit"];
+      //   } else if (
+      //     result.sttype === "OrdBill" &&
+      //     result.ststatus === "Invoice : Paid In Full"
+      //   ) {
+      //     buttonIds = ["createdeposit"];
+      //     if (result.strelatedrecord) {
+      //       buttonIds = ["process", "createdeposit"];
+      //     }
+      //   }
+
+      //   for (const id of buttonIds) {
+      //     form.removeButton({ id });
+      //   }
+      // }
     }
   }
 
