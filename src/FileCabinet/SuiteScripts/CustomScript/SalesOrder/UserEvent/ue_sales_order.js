@@ -30,6 +30,11 @@ define([
         newRec: scriptContext.newRecord,
         form: scriptContext.form,
       });
+
+      lib.setStatusForBot({
+        newRec: scriptContext.newRecord,
+        form: scriptContext.form,
+      });
     }
   };
 

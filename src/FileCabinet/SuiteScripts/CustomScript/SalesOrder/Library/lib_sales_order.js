@@ -1,7 +1,7 @@
 /**
  * @NApiVersion 2.1
  */
-define(["N/query", "N/ui/dialog"], (query, dialog) => {
+define(["N/query", "N/ui/dialog", "N/record"], (query, dialog, record) => {
   const itemIsInactive = (options) => {
     let isTrue = true;
     let arrData = [];
@@ -76,24 +76,65 @@ define(["N/query", "N/ui/dialog"], (query, dialog) => {
     };
     try {
       const inStatus = options.newRec.getValue("custbody_pdi_approval_status");
-      if (inStatus == 8) {
-        const stStatus = options.newRec.getText("custbody_pdi_approval_status");
-        const bgColor = NsLabelColor.YELLOW;
+      const stStatus = options.newRec.getText("custbody_pdi_approval_status");
+      const bgColor = NsLabelColor.YELLOW;
 
+      if (inStatus == 8) {
         options.form.addField({
           id: "custpage_status_label",
           label: "Custom State",
           type: "inlinehtml",
         }).defaultValue = `<script>jQuery(function($){
-                    require([], function() {
-                        $(".uir-page-title-secondline").append('<div class="uir-record-status" style="background-color: ${bgColor}">${stStatus}</div>');
-                    });
-                })</script>`;
+                              require([], function() {
+                                $(".uir-page-title-secondline").append('<div class="uir-record-status" style="background-color: ${bgColor}">${stStatus}</div>');
+                              });
+                            })</script>`;
+      } else if (inStatus == 13) {
+        options.form.addField({
+          id: "custpage_status_label",
+          label: "Custom State",
+          type: "inlinehtml",
+        }).defaultValue = `<script>jQuery(function($){
+                              require([], function() {
+                                const checkExist = setInterval(function() {
+                                  $status = $(".uir-record-status");
+                                  if ($status.length) {
+                                    clearInterval(checkExist);
+                                    $status.text("${stStatus}");
+                                    $status.css({
+                                      "background-color": "${bgColor}",
+                                      "color": "#000",
+                                      "border": "none"
+                                    });
+                                  }
+                                }, 200);
+                              });
+                            });</script>`;
       }
     } catch (e) {
       log.error("Error", `Error: ${e}`);
     }
   };
 
-  return { itemIsInactive, customState };
+  const setStatusForBot = (options) => {
+    const inStatus = options.newRec.getValue({
+      fieldId: "custbody_pdi_approval_status",
+    });
+    if (inStatus == 14) {
+      record.submitFields({
+        type: record.Type.SALES_ORDER,
+        id: options.newRec.id,
+        values: {
+          custbody_pdi_approval_status: 13,
+        },
+      });
+      options.form.addField({
+        id: "custpage_reload_script",
+        type: "inlinehtml",
+        label: "hidden",
+      }).defaultValue = `<script>window.location.reload();</script>`;
+    }
+  };
+
+  return { itemIsInactive, customState, setStatusForBot };
 });
