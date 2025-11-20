@@ -1,7 +1,7 @@
 /**
  * @NApiVersion 2.1
  */
-define(["N/record", "N/query"], (record, query) => {
+define(["N/record", "N/query", "N/ui/dialog"], (record, query, dialog) => {
   const updatePDC = (options) => {
     const eventType = options.type;
 
