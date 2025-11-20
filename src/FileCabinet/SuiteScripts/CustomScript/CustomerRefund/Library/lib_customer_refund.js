@@ -96,7 +96,7 @@ define(["N/query", "N/record"], (query, record) => {
       type: record.Type.SALES_ORDER,
       id: objData.salesorder_id,
       values: {
-        custbody_pdi_approval_status: 8,
+        custbody_pdi_approval_status: 14,
         custbody_pdi_next_approver: 3,
       },
     });
@@ -165,6 +165,29 @@ define(["N/query", "N/record"], (query, record) => {
     return isTrue;
   };
 
+  const showWarningMessage = (options) => {
+    if (options.showmsg === "T") {
+      options.form.addField({
+        id: "custpage_inline_message",
+        type: "inlinehtml",
+        label: "Hidden",
+      }).defaultValue = `
+      <script>
+        setTimeout(() => {
+          require(['N/ui/message'], (message) => {
+            const msg = message.create({
+              title: 'Action Required',
+              message: 'Please refresh or reload the related <b>Sales Order</b> record to view the updated Approval Status.<br><br>' +
+              'This step is <b>required</b> after creating a Customer Refund record.',
+              type: message.Type.WARNING
+              });
+            msg.show({ duration: 9000 });
+          });
+        }, 1000);
+      </script>`;
+    }
+  };
+
   return {
     autoPopulateFields,
     disabledFields,
@@ -172,5 +195,6 @@ define(["N/query", "N/record"], (query, record) => {
     addField,
     fldChanged,
     checkingCheckNumber,
+    showWarningMessage,
   };
 });
