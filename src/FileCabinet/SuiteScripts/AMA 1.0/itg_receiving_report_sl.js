@@ -111,6 +111,8 @@ function GeneratePDFRR(id,type){
 var ItemDesc = '';
 var TotalQty = 0;
 var TotalAmount = 0;
+var Discount = 0;
+var TotalAmountWithDiscount = 0;
 
 // Load PO record if createdfrom is available
 var poRec = null;
@@ -119,6 +121,14 @@ if (OrderType == 'PurchOrd' && PONoID) {
 		poRec = nlapiLoadRecord('purchaseorder', PONoID);
 	} catch (e) {
 		nlapiLogExecution('ERROR', 'Failed to load PO', e.toString());
+	}
+}
+
+for (var indx = 1; indx <= poRec.getLineItemCount('item'); indx++) {
+	var ItemType = poRec.getLineItemValue('item', 'itemtype', indx);
+	if (ItemType === 'Discount') {
+		var DiscountRate = parseFloat(catchIsNaN(poRec.getLineItemValue('item', 'rate', indx))) || 0;
+		Discount += DiscountRate;
 	}
 }
 
@@ -136,7 +146,7 @@ for (var x = 1; x <= rec.getLineItemCount('item'); x++) {
 	var ItemDisplay = catchNull(nlapiLookupField('item', ItemId, 'displayname'));
 
 	// Always get the correct rate from PO if item type is NonInvtPart, OtherCharge, or Service
-	if ((ItemType === 'NonInvtPart' || ItemType === 'OtherCharge' || ItemType === 'Service') && poRec) {
+	if ((ItemType === 'NonInvtPart' || ItemType === 'OtherCharge' || ItemType === 'Service' || ItemType === 'OthCharge') && poRec) {
 		for (var y = 1; y <= poRec.getLineItemCount('item'); y++) {
 			var poItemId = poRec.getLineItemValue('item', 'item', y);
 			var poQty = parseFloat(poRec.getLineItemValue('item', 'quantity', y)) || 0;
@@ -156,6 +166,7 @@ for (var x = 1; x <= rec.getLineItemCount('item'); x++) {
 	var Amount = Qty * Rate;
 	TotalQty += Qty;
 	TotalAmount += Amount;
+	TotalAmountWithDiscount = TotalAmount - (Discount*-1);
 
 	// Append to xmldet for IR printing
 	xmldet += "<tr>";
@@ -418,7 +429,7 @@ for (var x = 1; x <= rec.getLineItemCount('item'); x++) {
 											xml += "<span style='font-weight: bold'>Grand Total (Amount):</span>";
 										xml += "</td>";
 										xml += "<td align='right' style='width: 1in;' class='brdr-top brdr-bottom brdr-right'>";
-											xml += "<span style='font-weight: bold'>"+ currencySymbol + ' ' + toCurrency(TotalAmount) +"</span>";
+											xml += "<span style='font-weight: bold'>"+ currencySymbol + ' ' + toCurrency(TotalAmountWithDiscount) +"</span>";
 										xml += "</td>";
 									xml += "</tr>";
 									
