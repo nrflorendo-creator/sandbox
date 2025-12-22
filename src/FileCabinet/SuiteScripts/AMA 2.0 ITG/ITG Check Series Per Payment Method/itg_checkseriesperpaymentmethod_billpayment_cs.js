@@ -125,10 +125,21 @@ define(["N/runtime", "N/url", "N/https", "N/ui/dialog"], (
 
             if (options.stType == "save_record") {
               if (data.body.id == 472) {
+                // This is for GCASH Account!!!
                 // 269816 : Admin Internal ID (Florendo, John Nathaniel R)
-                const allowedUsers = [269816, 225854, 32839, 245274];
 
-                if (allowedUsers.includes(options.inUser)) {
+                // const allowedUsers = [269816, 225854, 32839, 245274, 278615];
+                // if (allowedUsers.includes(options.inUser)) {
+
+                const objAllowedUsers = {
+                  269816: "Florendo, John Nathaniel R",
+                  225854: "Soriano, Rosario M",
+                  32839: "Vidar, Vanessa V",
+                  245274: "GAGARIN, JIMVER F",
+                  278615: "Timbal, Mariel B",
+                };
+
+                if (objAllowedUsers[options.inUser]) {
                   return true;
                 } else {
                   dialog.alert({
